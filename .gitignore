@@ -1,0 +1,13 @@
+# hidden and temp files
+.*
+*~
+\#*#
+
+# obj
+bin
+gen
+
+local.properties
+
+# exclude
+!.gitignore
