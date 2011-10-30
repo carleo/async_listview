@@ -1,4 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">AsyncListActivity</string>
+    <string name="retry">Retry</string>
+    <string name="loading">Loading...</string>
+    <string name="no_connection">No connection!</string>
+    <string name="network_error">Network error</string>
+    <string name="network_timeout">Network timeout</string>
+    <string name="unknown_error">Unknow error</string>
+    <string name="wait">Please wait...</string>
+
+    <string name="menu_refresh">Refresh</string>
+    <string name="menu_test">Test</string>
+
+    <string name="clear_cache">Clear Cache</string>
+    <string name="clear_text">You can click this button to clear cached images on sd-card.
+    </string>
 </resources>

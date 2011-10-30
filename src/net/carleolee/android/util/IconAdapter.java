@@ -17,6 +17,8 @@ public abstract class IconAdapter<K, E> extends BaseAdapter {
 
     protected boolean mActive;
 
+    protected volatile boolean mNetworkUp = true;
+
     protected final boolean mLocalAsync;
 
     protected final int mDefaultRes;
@@ -39,7 +41,6 @@ public abstract class IconAdapter<K, E> extends BaseAdapter {
         mImageCache = new CacheStrategy<K, Bitmap>();
         mImageLoader = new AsyncLoader<K, String, ImageView, E, Bitmap>(mProxy);
     }
-
 
     /**
      * constructor with custom capacity.
@@ -86,8 +87,10 @@ public abstract class IconAdapter<K, E> extends BaseAdapter {
                 Bitmap bm = null;
                 if (mLocalAsync)
                     bm = loadImageLocal(key, url, extra);
-                if (bm == null)
-                    bm = loadImageRemote(key, url, extra);
+                if (bm == null) {
+                    if (mNetworkUp)
+                        bm = loadImageRemote(key, url, extra);
+                }
                 return bm;
             }
 
@@ -97,6 +100,13 @@ public abstract class IconAdapter<K, E> extends BaseAdapter {
                 onImageLoaded(key, url, image, extra, drawable);
             }
         };
+    }
+
+    /**
+     * set network status
+     */
+    public void setNetworkStatus(boolean available) {
+        mNetworkUp = available;
     }
 
     /**
@@ -159,7 +169,7 @@ public abstract class IconAdapter<K, E> extends BaseAdapter {
             image.setImageBitmap(bm);
             bindImageHook(key, url, image, extra, bm);
         } else {
-            if (url != null && url.length() > 0) {
+            if (mNetworkUp && url != null && url.length() > 0) {
                 mImageLoader.loadData(key, url, image, extra);
                 if (mLoadingRes > 0)
                     image.setImageResource(mLoadingRes);
@@ -201,12 +211,23 @@ public abstract class IconAdapter<K, E> extends BaseAdapter {
     }
 
     /**
-     * this method should be called if whole list changed
+     * discard pending task.
      */
     public void resetLoader() {
         mImageLoader.invalidate();
     }
 
+    /**
+     * release or clear (if 'clear' is true) cache.
+     */
+    public void releaseCache(boolean clear) {
+        if (clear)
+            mImageCache.clear();
+        else
+            mImageCache.release();
+    }
+
+    @Override
     public void notifyDataSetChanged() {
         mImageLoader.invalidate();
         super.notifyDataSetChanged();
