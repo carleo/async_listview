@@ -11,24 +11,24 @@ import android.os.Message;
  *
  * @param <K> the type of keys
  * @param <T> the type of parameter
- * @param <V> the type of another parameter
  * @param <E> the type of extra parameter
+ * @param <V> the type of object passed to callback
  * @param <R> the type of result
  */
-public class AsyncLoader<K, T, V, E, R> {
+public class AsyncLoader<K, T, E, V, R> {
 
-    public interface LoaderProxy<K, T, V, E, R> {
+    public interface LoaderProxy<K, T, E, V, R> {
 
         /**
          * perform data loading on background threads. Note that this method
          * will be called concurrently by several working thread.
          */
-        public R doInBackground(K key, T param, V obj, E extra);
+        public R doInBackground(K key, T param, E extra);
 
         /**
          * run on main thread after {@link #doInBackground}
          */
-        public void onLoaded(K key, T param, V obj, E extra, R data);
+        public void onLoaded(K key, T param, E extra, V obj, R data);
     }
 
     class Node {
@@ -36,8 +36,8 @@ public class AsyncLoader<K, T, V, E, R> {
         Node next;
         K key;
         T param;
-        V obj;
         E extra;
+        V obj;
         R data;
     }
 
@@ -56,7 +56,7 @@ public class AsyncLoader<K, T, V, E, R> {
     private Node mHead;
     private Node mTail;
 
-    private final LoaderProxy<K, T, V, E, R> mProxy;
+    private final LoaderProxy<K, T, E, V, R> mProxy;
 
     private final Handler mHandler;
 
@@ -65,15 +65,15 @@ public class AsyncLoader<K, T, V, E, R> {
 
     private volatile int mTag;
 
-    public AsyncLoader(LoaderProxy<K, T, V, E, R> proxy) {
+    public AsyncLoader(LoaderProxy<K, T, E, V, R> proxy) {
         this(DEFAULT_CAPACITY, DEFAULT_WORKERS, proxy);
     }
 
-    public AsyncLoader(int capacity, LoaderProxy<K, T, V, E, R> proxy) {
+    public AsyncLoader(int capacity, LoaderProxy<K, T, E, V, R> proxy) {
         this(capacity, DEFAULT_WORKERS, proxy);
     }
 
-    public AsyncLoader(int capacity, int maxWorker, LoaderProxy<K, T, V, E, R> proxy) {
+    public AsyncLoader(int capacity, int maxWorker, LoaderProxy<K, T, E, V, R> proxy) {
         if (maxWorker < 1)
             throw new IllegalArgumentException("maxWorker must be great than 1");
         if (capacity <= maxWorker)
@@ -105,7 +105,7 @@ public class AsyncLoader<K, T, V, E, R> {
                         return;
                     mMap.remove(node.key);
                 }
-                mProxy.onLoaded(node.key, node.param, node.obj, node.extra, node.data);
+                mProxy.onLoaded(node.key, node.param, node.extra, node.obj, node.data);
             }
         };
     }
@@ -124,19 +124,22 @@ public class AsyncLoader<K, T, V, E, R> {
 
     /**
      * add new task to the queue.
+     * if task for key already exist, this new 'obj' will bind to that task.
      */
-    public void loadData(K key, T param, V obj, E extra) {
+    public void loadData(K key, T param, E extra, V obj) {
         synchronized (mLock) {
             if (mStoped) {
                 throw new IllegalStateException("This loader is stoped already");
             } else {
                 Node node = mMap.get(key);
                 if (node != null) {
+                    node.obj = obj;
                     // in queue, move to head
                     if (node.next != null && node.prev != null) {
-                        if (node.prev != mHead)
+                        if (node.prev != mHead) {
                             detach(node);
-                        attach(mHead, node);
+                            attach(mHead, node);
+                        }
                     }
                 } else {
                     node = new Node();
@@ -256,7 +259,7 @@ public class AsyncLoader<K, T, V, E, R> {
                     }
                 }
                 if (node != null) {
-                    R data = mProxy.doInBackground(node.key, node.param, node.obj, node.extra);
+                    R data = mProxy.doInBackground(node.key, node.param, node.extra);
                     node.data = data;
                     Message msg = mHandler.obtainMessage();
                     msg.obj = node;

@@ -13,7 +13,7 @@ public abstract class IconAdapter<K, E> extends BaseAdapter {
 
     protected CacheStrategy<K, Bitmap> mImageCache;
 
-    protected AsyncLoader<K, String, ImageView, E, Bitmap> mImageLoader;
+    protected AsyncLoader<K, String, E, ImageView, Bitmap> mImageLoader;
 
     protected boolean mActive;
 
@@ -25,7 +25,7 @@ public abstract class IconAdapter<K, E> extends BaseAdapter {
 
     protected final int mLoadingRes;
 
-    protected AsyncLoader.LoaderProxy<K, String, ImageView, E, Bitmap> mProxy;
+    protected AsyncLoader.LoaderProxy<K, String, E, ImageView, Bitmap> mProxy;
 
     /**
      * constructor with default cache and loader capacity.
@@ -39,7 +39,7 @@ public abstract class IconAdapter<K, E> extends BaseAdapter {
         mLoadingRes = loading_res;
         init();
         mImageCache = new CacheStrategy<K, Bitmap>();
-        mImageLoader = new AsyncLoader<K, String, ImageView, E, Bitmap>(mProxy);
+        mImageLoader = new AsyncLoader<K, String, E, ImageView, Bitmap>(mProxy);
     }
 
     /**
@@ -56,7 +56,7 @@ public abstract class IconAdapter<K, E> extends BaseAdapter {
         mLoadingRes = loading_res;
         init();
         mImageCache = new CacheStrategy<K, Bitmap>(cacheCapacity);
-        mImageLoader = new AsyncLoader<K, String, ImageView, E, Bitmap>(mProxy);
+        mImageLoader = new AsyncLoader<K, String, E, ImageView, Bitmap>(mProxy);
     }
 
     /**
@@ -75,15 +75,14 @@ public abstract class IconAdapter<K, E> extends BaseAdapter {
         mLoadingRes = loading_res;
         init();
         mImageCache = new CacheStrategy<K, Bitmap>(cacheCapacity);
-        mImageLoader = new AsyncLoader<K, String, ImageView, E, Bitmap>(
+        mImageLoader = new AsyncLoader<K, String, E, ImageView, Bitmap>(
                 loaderCapacity, loaderConcurrency, mProxy);
     }
 
     private void init() {
-        mProxy = new AsyncLoader.LoaderProxy<K, String, ImageView, E, Bitmap>() {
+        mProxy = new AsyncLoader.LoaderProxy<K, String, E, ImageView, Bitmap>() {
             @Override
-            public Bitmap doInBackground(K key, String url,
-                    ImageView image, E extra) {
+            public Bitmap doInBackground(K key, String url, E extra) {
                 Bitmap bm = null;
                 if (mLocalAsync)
                     bm = loadImageLocal(key, url, extra);
@@ -95,9 +94,9 @@ public abstract class IconAdapter<K, E> extends BaseAdapter {
             }
 
             @Override
-            public void onLoaded(K key, String url, ImageView image,
-                    E extra, Bitmap drawable) {
-                onImageLoaded(key, url, image, extra, drawable);
+            public void onLoaded(K key, String url, E extra, ImageView image,
+                    Bitmap drawable) {
+                onImageLoaded(key, url, extra, image, drawable);
             }
         };
     }
@@ -122,8 +121,8 @@ public abstract class IconAdapter<K, E> extends BaseAdapter {
     /**
      * call on main thread when image loaded.
      */
-    protected void onImageLoaded(K key, String url, ImageView image,
-            E extra, Bitmap bm) {
+    protected void onImageLoaded(K key, String url, E extra, ImageView image,
+            Bitmap bm) {
         Object objTag = image.getTag();
         boolean matched = (objTag != null && key.equals(objTag));
 
@@ -139,25 +138,25 @@ public abstract class IconAdapter<K, E> extends BaseAdapter {
                 mImageCache.putWeak(key, bm);
         }
 
-        bindImageHook(key, url, image, extra, bm);
+        bindImageHook(key, url, extra, image, bm);
     }
 
     /**
      * hook after bind image
      */
-    protected void bindImageHook(K key, String url, ImageView image,
-            E extra, Bitmap bm) {
+    protected void bindImageHook(K key, String url, E extra, ImageView image,
+            Bitmap bm) {
         // stub
     }
 
     /**
      * bind image
      */
-    protected void bindImage(K key, String url, ImageView image, E extra) {
+    protected void bindImage(K key, String url, E extra, ImageView image) {
         image.setTag(key);
         if (key == null) {
             image.setImageResource(mDefaultRes);
-            bindImageHook(key, url, image, extra, null);
+            bindImageHook(key, url, extra, image, null);
             return;
         }
 
@@ -167,17 +166,17 @@ public abstract class IconAdapter<K, E> extends BaseAdapter {
 
         if (bm != null) {
             image.setImageBitmap(bm);
-            bindImageHook(key, url, image, extra, bm);
+            bindImageHook(key, url, extra, image, bm);
         } else {
             if (mNetworkUp && url != null && url.length() > 0) {
-                mImageLoader.loadData(key, url, image, extra);
+                mImageLoader.loadData(key, url, extra, image);
                 if (mLoadingRes > 0)
                     image.setImageResource(mLoadingRes);
                 else
                     image.setImageResource(mDefaultRes);
             } else {
                 image.setImageResource(mDefaultRes);
-                bindImageHook(key, url, image, extra, null);
+                bindImageHook(key, url, extra, image, null);
             }
         }
     }

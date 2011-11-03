@@ -67,7 +67,7 @@ public class AppAdapter extends IconAdapter<String, Void> {
         if (item.urlhash == null)
             item.urlhash = MiscUtils.md5Hex(url);
 
-        bindImage(item.urlhash, url, holder.icon, null);
+        bindImage(item.urlhash, url, null, holder.icon);
 
         return convertView;
     }
