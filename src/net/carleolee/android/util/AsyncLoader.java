@@ -148,6 +148,7 @@ public class AsyncLoader<K, T, E, V, R> {
                     node.obj = obj;
                     node.extra = extra;
                     attach(mHead, node);
+                    mMap.put(key, node);
                     if (mMap.size() > mCapacity) {
                         mMap.remove(mTail.prev.key);
                         detach(mTail.prev);
@@ -170,9 +171,7 @@ public class AsyncLoader<K, T, E, V, R> {
      */
     public void invalidate() {
         synchronized (mLock) {
-            if (mStoped)
-                return;
-            else {
+            if (!mStoped) {
                 mTag++;
                 mMap.clear();
                 mHead.next = mTail;

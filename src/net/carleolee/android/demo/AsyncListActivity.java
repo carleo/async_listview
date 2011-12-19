@@ -64,7 +64,7 @@ public class AsyncListActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
+        setContentView(R.layout.list_activity);
 
         mList = new ArrayList<AppItem>();
         mTask = null;
@@ -162,7 +162,8 @@ public class AsyncListActivity extends Activity {
             refresh();
             return true;
         case R.id.menu_test:
-            Intent i = new Intent(this, SecondActivity.class);
+            Intent i = new Intent(this, MainActivity.class);
+            i.putExtra("test", true);
             startActivity(i);
             return true;
         default:
@@ -185,7 +186,7 @@ public class AsyncListActivity extends Activity {
             mTask = null;
         }
         if (mAdapter != null)
-            mAdapter.resetLoader();
+            mAdapter.notifyDataSetChanged();
 
         mList.clear();
         loadMore();

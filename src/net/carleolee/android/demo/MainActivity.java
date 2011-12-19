@@ -2,12 +2,13 @@ package net.carleolee.android.demo;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.AsyncTask;
 import android.view.View;
 import android.widget.Button;
 
-public class SecondActivity extends Activity {
+public class MainActivity extends Activity {
 
     ProgressDialog mProgressDlg = null;
     String mCacheDir;
@@ -15,14 +16,35 @@ public class SecondActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.second);
-        Button b = (Button) findViewById(R.id.clear);
+        mCacheDir = MiscUtils.getCacheDir(this);
+
+        setContentView(R.layout.main);
+        Button b = (Button) findViewById(R.id.clear_btn);
         b.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 clearCache();
             }
         });
-        mCacheDir = MiscUtils.getCacheDir(this);
+        Intent intent = getIntent();
+        boolean test = intent.getBooleanExtra("test", false);
+        b = (Button) findViewById(R.id.list_btn);
+        if (test) {
+            setTitle(R.string.title_test);
+            b.setVisibility(View.GONE);
+            return;
+        }
+
+        b.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                showIconList();
+            }
+        });
+
+    }
+
+    void showIconList() {
+        Intent intent = new Intent(this, AsyncListActivity.class);
+        startActivity(intent);
     }
 
     void clearCache() {

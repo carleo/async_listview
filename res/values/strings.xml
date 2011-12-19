@@ -12,7 +12,9 @@
     <string name="menu_refresh">Refresh</string>
     <string name="menu_test">Test</string>
 
+    <string name="title_test">Test</string>
+
     <string name="clear_cache">Clear Cache</string>
-    <string name="clear_text">You can click this button to clear cached images on sd-card.
-    </string>
+    <string name="clear_text">You can click this button to clear cached images on sd-card.</string>
+    <string name="icon_list">Icon ListView</string>
 </resources>

@@ -1,23 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:orientation="vertical">
 
     <LinearLayout
         android:id="@+id/footer_content"
         android:orientation="horizontal"
-        android:layout_width="fill_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="4dip"
-        android:gravity="center">
+        android:gravity="center_vertical" >
 
         <ProgressBar
             android:id="@+id/loading"
             android:indeterminateOnly="true"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:layout_centerVertical="true"
             />
 
         <TextView
@@ -25,7 +26,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="5dip"
-            android:layout_gravity="center_vertical"
             android:text="@string/loading"
             />
 
@@ -33,11 +33,10 @@
             android:id="@+id/retry"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
             android:layout_marginRight="4dip"
             android:text="@string/retry"
             />
 
     </LinearLayout>
 
-</FrameLayout>
+</LinearLayout>
